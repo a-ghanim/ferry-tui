@@ -7,11 +7,13 @@ A little boat for your AI coding conversations. Search your local history, pick 
 ## Install
 
 ```sh
-uv tool install git+https://github.com/a-ghanim/ferry-tui@v0.1.1
+uv tool install ferry-tui
 ferry
 ```
 
 Requires Python 3.10 or newer and an existing supported agent store. Ferry is an early release, tested on macOS. The receiving agent's CLI must be installed and authenticated to continue a transferred conversation.
+
+Already installed? Run `uv tool upgrade ferry-tui` to get the latest release.
 
 ## Use
 

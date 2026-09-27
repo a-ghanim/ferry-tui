@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ferry-tui"
-version = "0.1.1"
+version = "0.1.2"
 description = "One window for every AI coding conversation on this machine. List, search, preview, open, and carry a thread across to the other agent."
 readme = "README.md"
 license = { text = "MIT" }
@@ -21,6 +21,7 @@ classifiers = [
 dependencies = [
   "handoff-agent==0.1.3",
   "textual>=8.2.8,<9",
+  "rich>=14,<16",
   "click>=8.1,<9",
   "mcp>=2.2,<3",
 ]

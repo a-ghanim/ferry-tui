@@ -206,7 +206,7 @@ def test_mcp_uses_synthetic_archive_and_labels_transcripts(env, monkeypatch):
 @pytest.mark.parametrize("size", [(150, 42), (80, 24)])
 async def test_tui_search_and_preview(env, monkeypatch, size):
     from ferry.tui import FerryApp
-    from textual.widgets import Input
+    from textual.widgets import DataTable, Input
     import ferry.tui as tui
     monkeypatch.setattr(tui, "Index", lambda: env["index"])
     app = FerryApp()
@@ -216,6 +216,11 @@ async def test_tui_search_and_preview(env, monkeypatch, size):
         await pilot.pause(0.5)
         assert len(app.index.conversations(query="forecast")) == 1
         assert app.screen.has_class("narrow") == (size[0] < 100)
+        assert app.query_one("#list", DataTable).row_count == 1
+        if size[0] < 100:
+            await pilot.press("p")
+            await pilot.pause()
+            assert app.screen.has_class("previewing")
 
 
 @pytest.mark.asyncio

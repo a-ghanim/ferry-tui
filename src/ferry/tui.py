@@ -17,6 +17,7 @@ from pathlib import Path
 
 from rich.console import Group
 from rich.markdown import Markdown
+from rich.padding import Padding
 from rich.text import Text
 from textual import events, on, work
 from textual.app import App, ComposeResult, SuspendNotSupported
@@ -30,9 +31,10 @@ from ferry.adapters import agent_icon, agent_label
 from ferry.index import ConversationRow, Index, InstanceRow
 from ferry.paths import display_path
 
-INK = "#eee9df"
-CLAUDE = "#e69a65"
-CODEX = "#70b7a6"
+INK = "#edf3ee"
+MUTED = "#91a6a6"
+CLAUDE = "#ffae82"
+CODEX = "#7cdecf"
 ACCENT = {"codex": CODEX, "claude": CLAUDE, "claude-cowork": CLAUDE, "opencode": CODEX}
 
 
@@ -52,6 +54,10 @@ def fit(s: str, n: int) -> str:
     if n <= 1:
         return s[:n]
     return s if len(s) <= n else s[: n - 1].rstrip() + "…"
+
+
+def turns_label(count: int) -> str:
+    return f"{count} {'turn' if count == 1 else 'turns'}"
 
 
 def who_prefix(author: str, agent: str) -> str:
@@ -78,13 +84,13 @@ class ResponsiveBody(Horizontal):
 class Dialog(ModalScreen):
     DEFAULT_CSS = """
     Dialog { align: center middle; background: #000000 55%; }
-    Dialog > Vertical { width: 88; max-width: 94%; height: auto; max-height: 90%; overflow-y: auto; background: #1d1c1a; padding: 1 3; border-left: tall #e69a65; }
-    Dialog .title { text-style: bold; color: #eee9df; margin-bottom: 1; }
-    Dialog .dim { color: #8f8a82; }
-    Dialog Input { border: none; background: #292725; color: #eee9df; padding: 0 1; margin-top: 1; }
-    Dialog Input:focus { border: none; background: #34312e; }
+    Dialog > Vertical { width: 88; max-width: 94%; height: auto; max-height: 90%; overflow-y: auto; background: #17272e; padding: 2 3; border-left: tall #ffae82; }
+    Dialog .title { text-style: bold; color: #edf3ee; margin-bottom: 1; }
+    Dialog .dim { color: #91a6a6; }
+    Dialog Input { border: none; background: #243a40; color: #edf3ee; padding: 0 1; margin-top: 1; }
+    Dialog Input:focus { border: none; background: #315057; }
     Dialog #tab-panel:focus { border: none; }
-    Dialog .keys { color: #8f8a82; margin-top: 1; }
+    Dialog .keys { color: #7cdecf; margin-top: 1; }
     Dialog #tab-agent, Dialog #tab-mode { margin: 1 0; }
     """
     BINDINGS = [Binding("escape", "cancel", "cancel", show=False)]
@@ -251,34 +257,36 @@ class TabDialog(Dialog):
 class FerryApp(App):
     TITLE = "ferry"
     CSS = """
-    Screen { background: transparent; color: #eee9df; }
-    #masthead { height: 5; padding: 1 2 0 2; }
-    #boat { width: 13; height: 3; color: #e69a65; }
-    #brand { width: 1fr; height: 3; }
-    #route { width: auto; max-width: 45%; height: 3; color: #8f8a82; text-align: right; }
-    #search-wrap { height: 2; padding: 0 2 1 2; }
-    #search-glyph { width: 3; height: 1; color: #8f8a82; background: #1d1c1a; padding-left: 1; }
-    #search { width: 1fr; height: 1; border: none; background: #1d1c1a; color: #eee9df; padding: 0 1; }
-    #search:focus { border: none; background: #292725; }
-    #search > .input--placeholder { color: #77736d; }
+    Screen { background: transparent; color: #edf3ee; }
+    #masthead { height: 6; padding: 1 2 0 2; background: #14252c; }
+    #boat { width: 13; height: 4; color: #ffae82; }
+    #brand { width: 1fr; height: 4; }
+    #route { width: auto; max-width: 42%; height: 4; color: #91a6a6; text-align: right; }
+    #search-wrap { height: 3; padding: 0 2 1 2; background: #14252c; }
+    #search-glyph { width: 3; height: 2; color: #7cdecf; background: #243a40; padding-left: 1; }
+    #search { width: 1fr; height: 2; border: none; background: #243a40; color: #edf3ee; padding: 0 1; }
+    #search:focus { border: none; background: #315057; }
+    #search > .input--placeholder { color: #91a6a6; }
     #body { height: 1fr; }
-    #left { width: 50%; height: 1fr; background: transparent; padding-left: 1; }
-    .section-label { height: 2; padding: 0 1; color: #77736d; text-style: bold; }
+    #left { width: 52%; height: 1fr; background: transparent; padding-left: 1; }
+    .section-label { height: 2; padding: 0 1; color: #7cdecf; text-style: bold; }
     #list { height: 1fr; background: transparent; scrollbar-size: 1 1; overflow-x: hidden; }
-    #list > .datatable--cursor { background: #eee9df; color: #181715; text-style: bold reverse; }
-    #list > .datatable--hover { background: #292725; }
-    #empty { padding: 2 2; color: #8f8a82; display: none; }
-    #rule { width: 1; height: 1fr; color: #3b3834; }
+    #list > .datatable--cursor { background: #29494d; color: #edf3ee; text-style: bold; }
+    #list > .datatable--hover { background: #1b3035; }
+    #empty { padding: 2 2; color: #91a6a6; display: none; }
+    #rule { width: 1; height: 1fr; color: #315057; }
     #right { width: 1fr; height: 1fr; }
     #preview-label { padding-left: 2; }
     #preview { width: 1fr; height: 1fr; padding: 0 3 1 3; background: transparent; scrollbar-size: 1 1; }
     #preview-body { width: 1fr; }
-    #footer { height: 1; color: #8f8a82; padding: 0 2; }
+    #footer { height: 2; color: #91a6a6; padding: 0 2; background: #14252c; }
     Screen.narrow #left { width: 1fr; }
     Screen.narrow #right, Screen.narrow #rule { display: none; }
     Screen.narrow.previewing #left { display: none; }
     Screen.narrow.previewing #right { display: block; }
     Screen.narrow #route { max-width: 35%; }
+    Screen.narrow #masthead { height: 5; padding: 0 1; }
+    Screen.narrow #search-wrap { padding: 0 1 1 1; }
     """
     BINDINGS = [
         Binding("enter", "open", "open", show=False, priority=True),
@@ -299,7 +307,7 @@ class FerryApp(App):
     ]
 
     def __init__(self) -> None:
-        super().__init__(ansi_color=True)
+        super().__init__(ansi_color=False)
         self.index = Index()
         self.convs: list[ConversationRow] = []
         self.rows: list[tuple[str, ConversationRow, InstanceRow | None]] = []  # (kind, conv, inst)
@@ -316,31 +324,27 @@ class FerryApp(App):
     # ---- layout ---------------------------------------------------------- #
     def compose(self) -> ComposeResult:
         with Horizontal(id="masthead"):
-            yield Static("   ┌─┐\n __│•│___\n \\______/ ≋", id="boat", markup=False)
-            yield Static(Text.assemble(("ferry", "bold"), (f"  v{__version__}\n", "dim"), ("A little boat for your conversations.\n", "dim"), ("Pick up where you left off.", "dim")), id="brand")
+            yield Static("    ╭─╮\n ╭──┤•├──╮\n ╰───────╯ ≋", id="boat", markup=False)
+            yield Static(Text.assemble(("ferry", f"bold {INK}"), (f"  v{__version__}\n", MUTED), ("Your conversations, all in one tide.\n", MUTED), ("Pick up where you left off.", f"bold {CLAUDE}")), id="brand")
             yield Static("", id="route")
         with Horizontal(id="search-wrap"):
-            yield Static("⌕", id="search-glyph")
-            yield Input(placeholder="Search every conversation", id="search")
+            yield Static("⌕ ", id="search-glyph")
+            yield Input(placeholder="Search titles, messages, or tags…   /", id="search")
         with ResponsiveBody(id="body"):
             with Vertical(id="left"):
                 yield Static("CONVERSATIONS", id="list-label", classes="section-label")
-                yield DataTable(id="list", show_header=False, cursor_type="row", zebra_stripes=False, show_cursor=True)
+                yield DataTable(id="list", show_header=False, cursor_type="row", zebra_stripes=False, show_cursor=True, cursor_foreground_priority="renderable", cursor_background_priority="css")
                 yield Static("", id="empty")
             yield Static("", id="rule")
             with Vertical(id="right"):
                 yield Static("TRANSCRIPT  ·  p to focus", id="preview-label", classes="section-label")
                 with VerticalScroll(id="preview"):
                     yield Static("", id="preview-body")
-        yield Static(
-            Text.assemble(
-                ("enter", "bold"), " open    ",
-                ("tab", "bold"), " hand off    ",
-                ("/", "bold"), " search    ",
-                ("q", "bold"), " quit",
-            ),
-            id="footer",
-        )
+        keys = Text()
+        for key, label in ((" ↵ ", "open"), (" ⇥ ", "carry"), (" / ", "search"), (" ? ", "keys"), (" q ", "quit")):
+            keys.append(key, style=f"bold #14252c on {CODEX if key.strip() == '⇥' else MUTED}")
+            keys.append(f" {label}   ", style=MUTED)
+        yield Static(keys, id="footer")
 
     def on_mount(self) -> None:
         table = self.query_one("#list", DataTable)
@@ -375,36 +379,21 @@ class FerryApp(App):
 
     # ---- rows ------------------------------------------------------------- #
     def _widths(self) -> dict:
-        """Column plan for the current pane width. Narrow panes drop tags, then folder."""
+        """Keep dates aligned while giving titles and their metadata room."""
         left = self.query_one("#left").size.width
         if left <= 0:
-            left = int(self.size.width * 0.5) if self.size.width else 90
+            left = int(self.size.width * 0.52) if self.size.width else 90
         total = max(30, left - 2)  # scrollbar
         pad = 2  # DataTable pads each cell by one space per side
-        date_w = 10 if total >= 80 else 5
-        tags_w = min(18, total // 7) if total >= 78 else 0
-        folder_w = min(24, total // 5) if total >= 96 else 0
-        ncols = 4 + (1 if tags_w else 0) + (1 if folder_w else 0)
-        title_w = max(12, total - (1 + 2 + date_w + tags_w + folder_w) - pad * ncols)
-        return {"title": title_w, "date": date_w, "tags": tags_w, "folder": folder_w}
+        date_w = 10 if total >= 56 else 5
+        title_w = max(12, total - (1 + 2 + date_w) - pad * 4)
+        return {"title": title_w, "date": date_w}
 
     def _rebuild_columns(self, table: DataTable, plan: dict) -> None:
         table.clear(columns=True)
         cols = [("mark", 1), ("icon", 2), ("title", plan["title"]), ("date", plan["date"])]
-        if plan["tags"]:
-            cols.append(("tags", plan["tags"]))
-        if plan["folder"]:
-            cols.append(("folder", plan["folder"]))
         self._columns = [table.add_column(name, width=w, key=name) for name, w in cols]
         self._plan = plan
-
-    def _cells(self, plan: dict, mark, icon, title, date, tags, folder) -> list:
-        cells = [mark, icon, title, date]
-        if plan["tags"]:
-            cells.append(tags)
-        if plan["folder"]:
-            cells.append(folder)
-        return cells
 
     def reload_rows(self, keep_cursor: bool = True) -> None:
         table = self.query_one("#list", DataTable)
@@ -419,7 +408,7 @@ class FerryApp(App):
         plan = self._widths()
         self._rebuild_columns(table, plan)
         self.rows = []
-        title_w, tags_w, folder_w, date_w = plan["title"], plan["tags"], plan["folder"], plan["date"]
+        title_w, date_w = plan["title"], plan["date"]
         date_fmt = "%Y-%m-%d" if date_w >= 10 else "%m-%d"
         ordered: list[tuple[str | None, ConversationRow]] = []
         if self.grouped:
@@ -434,32 +423,38 @@ class FerryApp(App):
             ordered = [(None, c) for c in self.convs]
         for header, conv in ordered:
             if header is not None:
-                table.add_row(*self._cells(plan, "", "", Text(f"#{header}", style="dim bold"), "", "", ""), key=f"hdr:{header}")
+                table.add_row("", "", Text(f"  # {header.upper()}", style=f"bold {CODEX}"), "", key=f"hdr:{header}")
                 self.rows.append(("hdr", conv, None))
                 continue
-            mark = Text("●" if conv.id in self.marked else " ", style="bold")
+            mark = Text("◆" if conv.id in self.marked else "∙", style=f"bold {CLAUDE if conv.id in self.marked else MUTED}")
             icon = Text("")
             for a in conv.agents:
                 icon.append(agent_icon(a), style=f"bold {accent(a)}")
-            title = Text(fit(conv.title, title_w), style="bold" if conv.has_title else "dim")
-            date = Text(local(conv.updated_at, date_fmt), style="dim")
-            tags = Text(fit(" ".join("#" + t for t in conv.tags), tags_w), style="dim") if tags_w else ""
-            folder = Text(fit(display_path(conv.folder), folder_w), style="dim") if folder_w else ""
-            table.add_row(*self._cells(plan, mark, icon, title, date, tags, folder), key=f"conv:{conv.id}")
+            title = Text(fit(conv.title, title_w), style=f"bold {INK}" if conv.has_title else MUTED)
+            meta = f"{agent_label(conv.newest.agent)} · {turns_label(conv.newest.turns)}"
+            if conv.newest.from_agent:
+                meta += f" · from {agent_label(conv.newest.from_agent)}"
+            if conv.tags:
+                meta += "  " + " ".join("#" + tag for tag in conv.tags[:2])
+            elif conv.folder:
+                meta += "  " + display_path(conv.folder)
+            title.append("\n" + fit(meta, title_w), style=MUTED)
+            date = Text(local(conv.updated_at, date_fmt), style=MUTED)
+            table.add_row(mark, icon, title, date, height=3, key=f"conv:{conv.id}")
             self.rows.append(("conv", conv, None))
             if conv.id in self.expanded:
                 for inst in conv.instances:
                     via = f" ← {agent_label(inst.from_agent)}" if inst.from_agent else ""
-                    line = Text(fit(f"  ↳ {agent_label(inst.agent)} · {inst.turns} turns{via}", title_w), style="dim")
-                    icell = Text(agent_icon(inst.agent), style=f"dim {accent(inst.agent)}")
-                    dcell = Text(local(inst.updated_at, "%m-%d %H:%M" if date_w >= 10 else "%m-%d"), style="dim")
-                    fcell = Text(fit(display_path(inst.cwd), folder_w), style="dim") if folder_w else ""
-                    table.add_row(*self._cells(plan, "", icell, line, dcell, "", fcell), key=f"inst:{inst.id}")
+                    line = Text(fit(f"↳ {agent_label(inst.agent)} · {turns_label(inst.turns)}{via}", title_w), style=f"bold {accent(inst.agent)}")
+                    line.append("\n" + fit(display_path(inst.cwd) or "no folder", title_w), style=MUTED)
+                    icell = Text(agent_icon(inst.agent), style=f"bold {accent(inst.agent)}")
+                    dcell = Text(local(inst.updated_at, date_fmt), style=MUTED)
+                    table.add_row("", icell, line, dcell, height=2, key=f"inst:{inst.id}")
                     self.rows.append(("inst", conv, inst))
         empty = self.query_one("#empty", Static)
         table.display = bool(self.rows)
         label = "SEARCH RESULTS" if self.query else "BY TAG" if self.grouped else "CONVERSATIONS"
-        self.query_one("#list-label", Static).update(f"{label}  ·  {len(self.convs)}  ·  ? keys")
+        self.query_one("#list-label", Static).update(f"◈  {label}   {len(self.convs)}")
         if not self.rows:
             empty.update(self._empty_text())
             empty.styles.display = "block"
@@ -480,20 +475,20 @@ class FerryApp(App):
         present = sorted({agent for conv in self.convs for agent in conv.agents})
         for position, agent in enumerate(present):
             if position:
-                route.append("  ", style="dim")
+                route.append("  ⇄  ", style=MUTED)
             route.append(agent_icon(agent), style=f"bold {accent(agent)}")
             if self.size.width >= 120:
-                route.append(f" {agent_label(agent)}", style="dim")
+                route.append(f" {agent_label(agent)}", style=INK)
         if present:
-            route.append("\n", style="dim")
+            route.append("\n", style=MUTED)
         noun = "conversation" if len(self.convs) == 1 else "conversations"
-        route.append(f"{len(self.convs)} {noun}", style="dim")
+        route.append(f"{len(self.convs)} {noun}", style=MUTED)
         if self.marked:
-            route.append(f"  ·  {len(self.marked)} selected", style="bold")
+            route.append(f"  ·  {len(self.marked)} selected", style=f"bold {CLAUDE}")
         elif self.query:
-            route.append(f"\nmatching “{fit(self.query, 18)}”", style="dim")
+            route.append(f"\nmatching “{fit(self.query, 18)}”", style=MUTED)
         else:
-            route.append("\nall on this machine", style="dim")
+            route.append("\nall on this machine", style=MUTED)
         self.query_one("#route", Static).update(route)
 
     def _empty_text(self) -> Text:
@@ -522,57 +517,57 @@ class FerryApp(App):
         kind, conv, inst = self.rows[row]
         body = self.query_one("#preview-body", Static)
         if kind == "hdr":
-            body.update(Text(f"#{conv.tags[0] if conv.tags else 'untagged'}", style="dim"))
+            body.update(Text(f"# {conv.tags[0] if conv.tags else 'untagged'}", style=f"bold {CODEX}"))
             return
         text = Text()
+        text.append("SELECTED CONVERSATION\n", style=f"bold {CODEX}")
         text.append(conv.title, style=f"bold {INK}")
         text.append("\n\n")
         newest = inst or conv.newest
-        text.append(agent_icon(newest.agent) + "  ", style=f"bold {accent(newest.agent)}")
-        meta = f"{agent_label(newest.agent)}  ·  {local(newest.updated_at, '%b %d · %H:%M')}\n{display_path(newest.cwd) or 'no folder'}"
+        text.append(f" {agent_icon(newest.agent)} {agent_label(newest.agent).upper()} ", style=f"bold #14252c on {accent(newest.agent)}")
+        meta = f"  {local(newest.updated_at, '%b %d · %H:%M')}\n{display_path(newest.cwd) or 'no folder'}"
         if conv.tags:
             meta += "  ·  " + " ".join("#" + t for t in conv.tags)
-        text.append(meta + "\n", style="dim")
-        text.append(transfer.summary_line(newest), style="dim")
-        text.append("\n")
+        text.append(meta + "\n", style=MUTED)
+        text.append(transfer.summary_line(newest), style=MUTED)
+        text.append("\n", style=MUTED)
         if newest.from_agent:
             parent = self.index.instance(newest.parent_instance_id) if newest.parent_instance_id else None
             carried = f" · {parent.turns} source turns" if parent else ""
-            text.append(f"moved from {agent_label(newest.from_agent)}{carried}\n", style=f"bold {accent(newest.from_agent)}")
+            text.append(f"↳  carried from {agent_label(newest.from_agent)}{carried}\n", style=f"bold {accent(newest.from_agent)}")
         if not newest.openable:
-            text.append((newest.extra.get("note") or "This instance cannot be reopened from outside its app.") + "\n", style="dim")
+            text.append((newest.extra.get("note") or "This instance cannot be reopened from outside its app.") + "\n", style=MUTED)
         if len(conv.instances) > 1 and not inst:
-            text.append(f"{len(conv.instances)} instances · e expands\n", style="dim")
-        text.append("\n")
-        text.append("─" * 12 + "\n\n", style="#3b3834")
+            text.append(f"{len(conv.instances)} linked instances · e expands\n", style=MUTED)
+        text.append("\n" + "─" * 22 + "\n\n", style="#315057")
         blocks = [text]
         pairs = [(inst, self.index.turns(inst.id))] if inst else self.index.conversation_turns(conv)
         shown = 0
         for i, turns in pairs:
             if len(pairs) > 1:
-                hdr = f"— {agent_label(i.agent)} · {i.turns} turns"
+                hdr = f"● {agent_label(i.agent)} · {turns_label(i.turns)}"
                 if i.from_agent:
                     hdr += f" · moved from {agent_label(i.from_agent)}"
-                blocks.append(Text(hdr + "\n", style="dim"))
+                blocks.append(Text(hdr + "\n\n", style=f"bold {accent(i.agent)}"))
             for t in turns:
-                role_style = "dim" if t.author == "user" else f"bold {accent(i.agent)}"
-                blocks.append(Text(who_prefix(t.author, i.agent), style=role_style))
+                role_style = MUTED if t.author == "user" else f"bold {accent(i.agent)}"
+                blocks.append(Text("▌  " + who_prefix(t.author, i.agent), style=role_style))
                 body_text = t.content.strip()
                 if body_text.startswith("[handoff]") and any(p.id == i.parent_instance_id for p, _ in pairs):
-                    # The carried transcript follows in this same message; the preview already
-                    # shows the source instance above, so keep only the banner line.
-                    blocks.append(Text(body_text.splitlines()[0] + "\n", style="dim"))
+                    blocks.append(Padding(Text(body_text.splitlines()[0], style=MUTED), (0, 0, 0, 3)))
+                    blocks.append(Text(""))
                     continue
-                blocks.append(Markdown(body_text, code_theme="ansi_dark", hyperlinks=False) if t.author != "user" else Text(body_text))
+                message = Markdown(body_text, code_theme="ansi_dark", hyperlinks=False) if t.author != "user" else Text(body_text)
+                blocks.append(Padding(message, (0, 0, 0, 3)))
                 blocks.append(Text(""))
                 shown += 1
                 if shown >= 300:
-                    blocks.append(Text("… (preview truncated; `ferry show` prints everything)\n", style="dim"))
+                    blocks.append(Text("… preview truncated; `ferry show` prints everything\n", style=MUTED))
                     break
             if shown >= 300:
                 break
         if shown == 0:
-            blocks.append(Text("No user or assistant turns were found in this session.", style="dim"))
+            blocks.append(Text("No user or assistant turns were found in this session.", style=MUTED))
         body.update(Group(*blocks))
         self.query_one("#preview", VerticalScroll).scroll_home(animate=False)
         self._maybe_title(conv)

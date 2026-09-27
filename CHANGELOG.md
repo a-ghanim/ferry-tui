@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Redesigned the Textual interface with a seafoam-and-coral palette, a clearer masthead, roomier conversation rows, and a quieter key legend.
+- Made linked agent lineage and the selected transcript easier to scan, including narrow-terminal preview navigation.
+- Refreshed the synthetic-only demo and documented installation directly from PyPI.
+
 ## 0.1.1
 
 - First public release from a fresh repository history.

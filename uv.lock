@@ -248,12 +248,13 @@ wheels = [
 
 [[package]]
 name = "ferry-tui"
-version = "0.1.1"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "handoff-agent" },
     { name = "mcp" },
+    { name = "rich" },
     { name = "textual" },
 ]
 
@@ -270,6 +271,7 @@ requires-dist = [
     { name = "mcp", specifier = ">=2.2,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "rich", specifier = ">=14,<16" },
     { name = "textual", specifier = ">=8.2.8,<9" },
 ]
 provides-extras = ["dev"]
